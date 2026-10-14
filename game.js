@@ -21,52 +21,52 @@
   let ground = [], blocks = [], pipes = [], coinItems = [], enemies = [], powerups = [], particles = [];
 
   function buildLevel() {
-    // The recognizable course 1-1 rhythm: opening question block, block arc,
-    // pipe run, hidden-reward gap, long block row, pyramid steps and the flag.
-    ground = [{ x: 0, w: 1776 }, { x: 1872, w: 2576 }, { x: 4544, w: 2624 }];
+    // World 1-1 landmarks follow the attached full-course map, scaled from its
+    // 16 px map tiles to this game's 32 px tiles.
+    ground = [{ x: 0, w: 2240 }, { x: 2304, w: 2080 }, { x: 4448, w: 2720 }];
     blocks = [];
     const brick = (x, y, n = 1) => { for (let i = 0; i < n; i++) blocks.push({ x: x + i * TILE, y, type: 'brick', used: false }); };
     const question = (x, y, reward = 'coin') => blocks.push({ x, y, type: 'question', reward, used: false, bump: 0 });
-    question(512, 288); // the first ? block
-    brick(672, 288); question(704, 288, 'mushroom'); brick(736, 288);
-    brick(672, 256); question(704, 256); brick(736, 256);
-    brick(704, 224);
-    // Three rising pipes and the pipe that hides the bonus room entrance.
+    question(400, 288); // opening ? block
+    brick(640, 288); question(672, 288, 'mushroom'); brick(704, 288);
+    brick(640, 256); question(672, 256); brick(704, 256);
+    brick(672, 224);
+    // The four early pipes rise in the same sequence as the map.
     pipes = [
-      { x: 1088, h: 64, bonus: false }, { x: 1312, h: 96, bonus: false },
-      { x: 1568, h: 128, bonus: true }, { x: 1792, h: 64, bonus: false },
-      { x: 4896, h: 96, bonus: false }
+      { x: 512, h: 64, bonus: false }, { x: 704, h: 96, bonus: false },
+      { x: 848, h: 128, bonus: true }, { x: 1056, h: 64, bonus: false },
+      { x: 5312, h: 96, bonus: false }
     ];
     // The hidden 1-up marker, second ? block, ten-coin brick and star block.
-    blocks.push({ x: 1984, y: 288, type: 'hidden', reward: 'life', used: false });
-    question(2144, 288, 'coin');
-    brick(2208, 352); blocks[blocks.length - 1].reward = 'ten';
-    brick(2304, 288); blocks[blocks.length - 1].reward = 'star';
-    question(2368, 256, 'mushroom'); brick(2336, 256); brick(2400, 256);
-    // A long overhead row with a gap in it.
-    brick(2608, 224, 9);
+    blocks.push({ x: 1200, y: 288, type: 'hidden', reward: 'life', used: false });
+    question(1360, 288, 'coin');
+    brick(1424, 352); blocks[blocks.length - 1].reward = 'ten';
+    brick(1520, 288); blocks[blocks.length - 1].reward = 'star';
+    question(1584, 256, 'mushroom'); brick(1552, 256); brick(1616, 256);
+    // Floating rows and coin formations shown across the middle of the map.
+    brick(2336, 224, 9);
     // Coin-bearing ? blocks and the high central formation.
-    question(3008, 288); brick(3040, 288); question(3072, 288);
-    brick(3168, 256); question(3200, 256); brick(3232, 256);
-    brick(3200, 224);
+    question(2752, 288); brick(2784, 288); question(2816, 288);
+    brick(2912, 256); question(2944, 256); brick(2976, 256);
+    brick(2944, 224);
     // Final block set and two classic stair pyramids.
-    brick(4192, 288); brick(4224, 288); question(4256, 288); brick(4288, 288);
-    for (let row = 0; row < 4; row++) brick(4496 + row * TILE, FLOOR - TILE * (row + 1), 4 - row);
-    for (let row = 0; row < 4; row++) brick(5248 + row * TILE, FLOOR - TILE * (row + 1), 4 - row);
+    brick(3904, 288); brick(3936, 288); question(3968, 288); brick(4000, 288);
+    for (let row = 0; row < 4; row++) brick(4224 + row * TILE, FLOOR - TILE * (row + 1), 4 - row);
+    for (let row = 0; row < 4; row++) brick(4704 + row * TILE, FLOOR - TILE * (row + 1), 4 - row);
     // End stretch: exit pipe, final coin blocks, staircase, flag.
-    pipes.push({ x: 5824, h: 64, bonus: false });
-    brick(6016, 288); brick(6048, 288); question(6080, 288); brick(6112, 288);
-    for (let row = 0; row < 7; row++) brick(6464 + row * TILE, FLOOR - TILE * (row + 1), 7 - row);
+    pipes.push({ x: 5120, h: 64, bonus: false });
+    brick(5472, 288); brick(5504, 288); question(5536, 288); brick(5568, 288);
+    for (let row = 0; row < 7; row++) brick(5760 + row * TILE, FLOOR - TILE * (row + 1), 7 - row);
 
     coinItems = [];
     const addCoins = (xs, y) => xs.forEach((x, i) => coinItems.push({ x, y: y + (i % 2 ? -10 : 0), taken: false, phase: Math.random() * 6 }));
-    addCoins([528, 560, 592], 236); addCoins([640, 704, 768], 194);
-    addCoins([1120, 1152, 1184], 256); addCoins([1408, 1440, 1472], 272);
-    addCoins([1968, 2000, 2032, 2064], 248); addCoins([2704, 2736, 2768, 2800], 186);
-    addCoins([3008, 3072, 3136], 230); addCoins([4384, 4416], 246);
-    addCoins([6180, 6212, 6244], 240);
+    addCoins([416, 448, 480], 236); addCoins([608, 672, 736], 194);
+    addCoins([1104, 1136, 1168], 256); addCoins([1408, 1440, 1472], 272);
+    addCoins([1968, 2000, 2032, 2064], 248); addCoins([2432, 2464, 2496, 2528], 186);
+    addCoins([2752, 2816, 2880], 230); addCoins([4112, 4144], 246);
+    addCoins([5620, 5652, 5684], 240);
     enemies = [];
-    [656, 944, 1248, 1672, 2048, 2496, 2880, 3424, 4000, 4688, 5040, 5600, 6180].forEach((x, i) => {
+    [560, 960, 1280, 1760, 2144, 2560, 3104, 3520, 4048, 4496, 4928, 5408, 6128].forEach((x, i) => {
       enemies.push({ x, y: FLOOR - 30, w: 28, h: 28, vx: i % 2 ? -54 : 54, alive: true, turn: Math.random() * 6, walk: 0 });
     });
     powerups = []; particles = [];
@@ -225,7 +225,7 @@
     rect(x + 2, y + 23, 10, 4, '#563642'); rect(x + 17, y + 23, 10, 4, '#563642');
   }
   function drawFlag() {
-    const x = 6864 - camera; rect(x, 148, 8, FLOOR - 148, '#f4f3df'); rect(x + 8, 158, 70, 46, '#27c879');
+    const x = 6352 - camera; rect(x, 148, 8, FLOOR - 148, '#f4f3df'); rect(x + 8, 158, 70, 46, '#27c879');
     rect(x + 8, 158, 52, 6, '#7af1ae'); rect(x + 8, 198, 52, 6, '#129457'); rect(x - 7, FLOOR - 6, 38, 11, '#d8c49b');
     rect(x - 1, 139, 21, 16, '#fff2c4');
   }
@@ -283,7 +283,7 @@
       }}
     particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.life-=dt;});particles=particles.filter(p=>p.life>0);
     camera=Math.max(0,Math.min(WORLD_W-W,player.x-W*.37));
-    if(player.x>WORLD_W-250)finish(true);
+    if(player.x>WORLD_W-610)finish(true);
     scoreEl.textContent=fmt(score);coinsEl.textContent=String(coins).padStart(2,'0');timerEl.textContent=String(Math.ceil(timeLeft)).padStart(3,'0');
   }
   function finish(won){
