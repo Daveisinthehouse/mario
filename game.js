@@ -90,9 +90,9 @@
     try {
       audio = audio || new (window.AudioContext || window.webkitAudioContext)();
       if (audio.state === 'suspended') audio.resume();
-      // A looping original arcade melody, synthesized locally with Web Audio.
-      const melody = [392,494,587,523,440,523,659,587,392,440,523,659,587,523,440,392,330,440,523,587,659,587,523,440,494,587,659,784,659,587,523,494];
-      const bass = [98,98,123,123,147,147,123,123,82,82,110,110,123,123,110,110];
+      // The familiar Super Mario Bros. ground-theme lead, synthesized locally.
+      const melody = [659,659,0,659,0,523,659,784,0,392,0,523,392,330,440,494,466,440,392,659,784,880,698,784,659,523,587,494,0,523,392,330];
+      const bass = [131,131,196,196,175,175,147,147,131,131,165,165,196,196,147,147];
       musicStep = 0;
       const note = (frequency, length, wave, volume) => {
         const osc = audio.createOscillator(), gain = audio.createGain();
@@ -105,7 +105,7 @@
       };
       musicTimer = setInterval(() => {
         if (!audioOn || mode !== 'play') return stopMusic();
-        note(melody[musicStep], .15, 'square', .018);
+        if (melody[musicStep]) note(melody[musicStep], .15, 'square', .018);
         if (musicStep % 2 === 0) note(bass[(musicStep >> 1) % bass.length], .27, 'triangle', .035);
         if (musicStep % 8 === 0) note([196,247,294,220][(musicStep >> 3) % 4], .24, 'triangle', .012);
         musicStep = (musicStep + 1) % melody.length;
