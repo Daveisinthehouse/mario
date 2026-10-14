@@ -6,7 +6,7 @@ A browser platform game with a hand-built, 16-bit-inspired take on the classic W
 
 Play online at <https://daveisinthehouse.github.io/mario/>.
 
-Open `index.html` in a modern browser. Use **← / →** or **A / D** to move, and **Space**, **↑**, or **W** to jump. Collect coins, hit blocks from below, get power-ups, stomp enemies, and reach the flag.
+Open `index.html` in a modern browser. Use **← / →** or **A / D** to move, and **Space**, **↑**, or **W** to jump. Collect coins, hit blocks from below, grow with mushrooms, stomp enemies, and reach the flag. The **SOUND** button toggles the synthesized ground-theme music and effects.
 
 No build tools or dependencies are required. Your high score is saved in the browser.
 
