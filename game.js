@@ -16,7 +16,7 @@
   const WORLD_W = 7168, FLOOR = 416;
   const keys = new Set();
   let mode = 'title', last = 0, camera = 0, score = 0, coins = 0;
-  let timeLeft = 400, elapsed = 0, audioOn = true, audio;
+  let timeLeft = 400, elapsed = 0, audioOn = true, audio, musicTimer = null, musicStep = 0;
   const player = { x: 112, y: FLOOR - 44, w: 28, h: 42, vx: 0, vy: 0, grounded: false, facing: 1, invuln: 0, big: false, walk: 0 };
   let ground = [], blocks = [], pipes = [], coinItems = [], enemies = [], powerups = [], particles = [];
 
@@ -85,15 +85,44 @@
       o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + dur);
     } catch {}
   }
+  function startMusic() {
+    if (!audioOn || musicTimer) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      // A looping original arcade melody, synthesized locally with Web Audio.
+      const melody = [392,494,587,523,440,523,659,587,392,440,523,659,587,523,440,392,330,440,523,587,659,587,523,440,494,587,659,784,659,587,523,494];
+      const bass = [98,98,123,123,147,147,123,123,82,82,110,110,123,123,110,110];
+      musicStep = 0;
+      const note = (frequency, length, wave, volume) => {
+        const osc = audio.createOscillator(), gain = audio.createGain();
+        osc.type = wave; osc.frequency.value = frequency;
+        gain.gain.setValueAtTime(.001, audio.currentTime);
+        gain.gain.linearRampToValueAtTime(volume, audio.currentTime + .012);
+        gain.gain.setValueAtTime(volume, audio.currentTime + length * .55);
+        gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + length);
+        osc.connect(gain); gain.connect(audio.destination); osc.start(); osc.stop(audio.currentTime + length + .01);
+      };
+      musicTimer = setInterval(() => {
+        if (!audioOn || mode !== 'play') return stopMusic();
+        note(melody[musicStep], .15, 'square', .018);
+        if (musicStep % 2 === 0) note(bass[(musicStep >> 1) % bass.length], .27, 'triangle', .035);
+        if (musicStep % 8 === 0) note([196,247,294,220][(musicStep >> 3) % 4], .24, 'triangle', .012);
+        musicStep = (musicStep + 1) % melody.length;
+      }, 155);
+    } catch { stopMusic(); }
+  }
+  function stopMusic() { if (musicTimer) clearInterval(musicTimer); musicTimer = null; }
   function start() {
     if (mode === 'play') return;
     score = 0; coins = 0; timeLeft = 400; elapsed = 0; camera = 0;
     Object.assign(player, { x: 112, y: FLOOR - 44, w: 28, h: 42, vx: 0, vy: 0, grounded: false, invuln: 0, big: false, walk: 0 });
-    buildLevel(); mode = 'play'; overlay.classList.add('hidden'); tone(660, .12); requestAnimationFrame(loop);
+    buildLevel(); mode = 'play'; overlay.classList.add('hidden'); tone(660, .12); startMusic(); requestAnimationFrame(loop);
   }
   startButton.addEventListener('click', start);
   document.getElementById('soundToggle').addEventListener('click', e => {
-    audioOn = !audioOn; e.currentTarget.querySelector('span').textContent = audioOn ? 'SOUND ON' : 'SOUND OFF'; tone(520);
+    audioOn = !audioOn; e.currentTarget.querySelector('span').textContent = audioOn ? 'SOUND ON' : 'SOUND OFF';
+    if (audioOn && mode === 'play') { tone(520); startMusic(); } else stopMusic();
   });
   window.addEventListener('keydown', e => {
     if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' ', 'ArrowDown'].includes(e.key)) e.preventDefault();
@@ -173,7 +202,9 @@
   function drawPlayer() {
     if (player.invuln > 0 && Math.floor(elapsed * 18) % 2) return;
     const x = Math.round(player.x - camera), y = Math.round(player.y), flip = player.facing < 0;
-    ctx.save(); if (flip) { ctx.translate(x + player.w, y); ctx.scale(-1,1); } else ctx.translate(x,y);
+    ctx.save(); ctx.translate(x, y - (player.big ? 16 : 0));
+    if (flip) { ctx.translate(player.big ? 34 : player.w, 0); ctx.scale(-1,1); }
+    ctx.scale(player.big ? 1.12 : 1, player.big ? 1.38 : 1);
     const bob = player.grounded && Math.abs(player.vx) > 20 ? Math.round(Math.sin(player.walk) * 2) : 0;
     // Bespoke chunky pixel hero with shaded overalls, gloves and a cap.
     rect(5, 1+bob, 21, 5, '#9d2d4b'); rect(2, 6+bob, 27, 7, '#ee4557'); rect(18, 7+bob, 13, 5, '#ff746c');
@@ -227,7 +258,7 @@
     const speed=player.big?246:234;
     if(left){player.vx=-speed;player.facing=-1;}else if(right){player.vx=speed;player.facing=1;}else player.vx*=Math.pow(.002,dt);
     if(Math.abs(player.vx)>20)player.walk+=dt*13;
-    if(jump&&player.grounded){player.vy=-520;player.grounded=false;tone(360,.08);}
+    if(jump&&player.grounded){player.vy=player.big?-900:-830;player.grounded=false;tone(360,.08);}
     player.vy=Math.min(800,player.vy+1450*dt);
     const oldX=player.x, oldY=player.y, oldBottom=oldY+player.h;
     player.x=Math.max(0,Math.min(WORLD_W-player.w,player.x+player.vx*dt));
@@ -243,12 +274,12 @@
     }
     if(player.y>H+60){finish(false);return;}
     for(const c of coinItems)if(!c.taken&&overlap(player,{x:c.x-8,y:c.y-12,w:16,h:24}))collectCoin(c);
-    for(const p of powerups){p.x+=p.vx*dt;p.y+=100*dt;for(const g of ground)if(p.x+28>g.x&&p.x<g.x+g.w&&p.y+24>=FLOOR)p.y=FLOOR-24;if(overlap(player,{x:p.x,y:p.y,w:28,h:24})){p.taken=true;player.big=true;player.h=48;player.y-=6;score+=1000;tone(680,.3,'triangle');}}
+    for(const p of powerups){p.x+=p.vx*dt;p.y+=100*dt;for(const g of ground)if(p.x+28>g.x&&p.x<g.x+g.w&&p.y+24>=FLOOR)p.y=FLOOR-24;if(overlap(player,{x:p.x,y:p.y,w:28,h:24})){p.taken=true;player.big=true;player.w=34;player.h=58;player.y-=16;score+=1000;tone(680,.3,'triangle');}}
     powerups=powerups.filter(p=>!p.taken&&p.x<WORLD_W);
     if(player.invuln>0)player.invuln-=dt;
     for(const e of enemies){if(!e.alive)continue;e.x+=e.vx*dt;e.walk+=dt*9;if(e.x<0||e.x>WORLD_W-40)e.vx*=-1;for(const p of pipes){if(e.x+e.w>p.x-7&&e.x<p.x+71)e.vx*=-1;}if(overlap(player,e)){
         if(player.vy>80&&oldY+player.h<e.y+16){e.alive=false;player.vy=-350;score+=200;tone(220,.1);burst(e.x+14,e.y+12,'#d89864');}
-        else if(player.invuln<=0){player.invuln=1.4;player.vx=player.x<e.x?-220:220;player.vy=-270;if(player.big){player.big=false;player.h=42;}else score=Math.max(0,score-100);tone(120,.16);}
+        else if(player.invuln<=0){player.invuln=1.4;player.vx=player.x<e.x?-220:220;player.vy=-270;if(player.big){player.big=false;player.w=28;player.h=42;player.y+=16;}else score=Math.max(0,score-100);tone(120,.16);}
       }}
     particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=240*dt;p.life-=dt;});particles=particles.filter(p=>p.life>0);
     camera=Math.max(0,Math.min(WORLD_W-W,player.x-W*.37));
@@ -256,7 +287,7 @@
     scoreEl.textContent=fmt(score);coinsEl.textContent=String(coins).padStart(2,'0');timerEl.textContent=String(Math.ceil(timeLeft)).padStart(3,'0');
   }
   function finish(won){
-    mode=won?'win':'over';overlayTitle.innerHTML=won?'COURSE<br><em>CLEAR!</em>':'TRY<br><em>AGAIN</em>';
+    stopMusic();mode=won?'win':'over';overlayTitle.innerHTML=won?'COURSE<br><em>CLEAR!</em>':'TRY<br><em>AGAIN</em>';
     overlayEyebrow.textContent=won?'WORLD 1-1 COMPLETE':'ADVENTURE PAUSED';
     overlayCopy.innerHTML=won?`Score ${fmt(score)} · ${coins} coins collected<br>You reached the flag!`:`Score ${fmt(score)} · ${coins} coins collected<br>Take another run at World 1-1.`;
     startButton.innerHTML='PLAY AGAIN <span>↻</span>';overlay.classList.remove('hidden');
