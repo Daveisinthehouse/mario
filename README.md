@@ -1,6 +1,6 @@
 # Pixel Run
 
-A browser platform game with a hand-built, 16-bit-inspired take on the classic World 1-1 course layout. The level follows its familiar sequence of opening blocks, pipe run, hidden reward, coin rows, brick formations, stairways, and flagpole. Artwork is drawn in code; no game image or sprite files are bundled.
+A browser platform game with a hand-built, 16-bit-inspired take on the classic World 1-1 course layout. The course geometry follows the supplied full-course map panorama, scaled to the game's tile grid, with the opening blocks, rising pipe run, brick formations, stair pyramids, and flagpole. Artwork is drawn in code; no game image or sprite files are bundled.
 
 ## Play
 
