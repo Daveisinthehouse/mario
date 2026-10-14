@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#162e59">
+  <title>Mario Brothers — Pixel Run</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="cabinet">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Pixel Run home"><span class="brand-mark">✦</span> PIXEL<span>RUN</span></a>
+      <div class="edition">ARCADE EDITION <i></i></div>
+      <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound">♪ <span>SOUND ON</span></button>
+    </header>
+
+    <section class="game-shell" aria-label="Pixel Run game">
+      <div class="hud">
+        <div><small>SCORE</small><strong id="score">000000</strong></div>
+        <div><small>COINS</small><strong class="coin-readout"><span>●</span> <b id="coins">00</b></strong></div>
+        <div><small>WORLD</small><strong>1-1</strong></div>
+        <div><small>TIME</small><strong id="timer">300</strong></div>
+      </div>
+      <div class="screen-wrap">
+        <canvas id="game" width="960" height="540" aria-label="A side-scrolling pixel platform game. Use arrow keys to move and space to jump."></canvas>
+        <div class="overlay" id="overlay">
+          <div class="overlay-card">
+            <div class="pixel-star">✦</div>
+            <p class="eyebrow" id="overlayEyebrow">A LITTLE ARCADE ADVENTURE</p>
+            <h1 id="overlayTitle">PIXEL<br><em>RUN</em></h1>
+            <p class="overlay-copy" id="overlayCopy">Run, leap and collect your way<br>through the Mushroom Kingdom.</p>
+            <button class="start-button" id="startButton">START GAME <span>▶</span></button>
+            <div class="key-hint">PRESS <kbd>ENTER</kbd> TO PLAY</div>
+          </div>
+        </div>
+      </div>
+      <div class="game-foot"><span><i class="live-dot"></i> PLAYER 1 READY</span><span>HIGH SCORE <b id="highScore">000000</b></span><span>© 1985 — JUST FOR FUN</span></div>
+    </section>
+
+    <section class="controls">
+      <div class="control-title"><span>HOW TO PLAY</span><span class="rule"></span><span>GET TO THE FLAG!</span></div>
+      <div class="control-items">
+        <div class="control-item"><div class="key-group"><kbd>←</kbd><kbd>→</kbd></div><div><b>MOVE</b><small>Arrow keys / A D</small></div></div>
+        <div class="control-item"><div class="key-group"><kbd class="space-key">SPACE</kbd></div><div><b>JUMP</b><small>Leap over those Goombas</small></div></div>
+        <div class="control-item"><div class="coin-icon">●</div><div><b>COLLECT COINS</b><small>Every coin counts</small></div></div>
+        <div class="control-item"><div class="flag-icon">⚑</div><div><b>REACH THE END</b><small>Find the flag to win</small></div></div>
+      </div>
+    </section>
+    <footer>MADE WITH <span>♥</span> AND A LITTLE PIXEL MAGIC</footer>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
